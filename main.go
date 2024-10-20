@@ -1,7 +1,20 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
-	fmt.Println("hello world")
+	for {
+		var input string
+		fmt.Printf("pokdex > ")
+		fmt.Scan(&input)
+		fmt.Printf("Input: %v \n", input)
+	}
+}
+
+type cliCommand struct {
+	name        string
+	description string
+	callback    func() error
 }
