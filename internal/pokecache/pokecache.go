@@ -16,6 +16,8 @@ type cacheEntry struct {
 }
 
 func (c *Cache) Add(key string, value []byte) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	var newEntry = &cacheEntry{}
 	newEntry.createdAt = time.Now()
 	newEntry.val = value
@@ -23,7 +25,11 @@ func (c *Cache) Add(key string, value []byte) {
 }
 
 func (c *Cache) Get(key string) ([]byte, bool) {
-
+	value, exists := c.cache[key]
+	if !exists {
+		return nil, false
+	}
+	return value.val, true
 }
 
 func (c *Cache) reapLoop() {
