@@ -38,7 +38,7 @@ func main() {
 			if cmd, exists := cmds[command]; exists {
 				err := cmd.callback(config, params)
 				if err != nil {
-					fmt.Printf("Error running command.callback %v\n", err)
+					fmt.Printf("%v\n", err)
 				}
 			} else {
 				fmt.Printf("Sorry, that's not a valid input \n")
@@ -423,6 +423,11 @@ func getCommands(config *Config, param []string) map[string]cliCommand {
 			description: "Tries to catch a pokemon",
 			callback:    catch,
 		},
+		"inspect": {
+			name:        "inspect",
+			description: "Check the stats of pokemon you have caught",
+			callback:    inspect,
+		},
 	}
 }
 func mapPrevious(config *Config, param []string) error {
@@ -577,20 +582,42 @@ func catch(config *Config, params []string) error {
 	if err := json.Unmarshal(data, &pokemon); err != nil {
 		return err
 	}
-	fmt.Printf("Throwing a Pokeball at pikachu...\n")
+	fmt.Printf("Throwing a Pokeball at %v...\n", pokemonToCatch)
 	catchVal := rand.IntN(1000)
 	if catchVal >= pokemon.BaseExperience {
 		fmt.Printf("%s was caught!\n", pokemonToCatch)
 		config.pokedex[pokemonToCatch] = pokemon
-		for _, pokemans := range config.pokedex {
-			fmt.Printf("%v pokedex\n", pokemans.Name)
-		}
 	} else {
 		fmt.Printf("%s got away!\n", pokemonToCatch)
 	}
 	return nil
 }
+func inspect(config *Config, params []string) error {
+	if len(params) == 0 {
+		return errors.New("you must input a pokemon to inspect")
+	}
+	pokemon := params[0]
+	value, exists := config.pokedex[pokemon]
+	if !exists {
+		return errors.New("you have not caught that pokemon")
+	} else {
+		fmt.Printf("Name: %v\n", value.Name)
+		fmt.Printf("Height: %v\n", value.Height)
+		fmt.Printf("Stats:\n")
+		fmt.Printf(" -hp: %v\n", value.Stats[0].BaseStat)
+		fmt.Printf(" -attack: %v\n", value.Stats[1].BaseStat)
+		fmt.Printf(" -defense: %v\n", value.Stats[2].BaseStat)
+		fmt.Printf(" -special-attack: %v\n", value.Stats[3].BaseStat)
+		fmt.Printf(" -special-defense: %v\n", value.Stats[4].BaseStat)
+		fmt.Printf(" -speed: %v\n", value.Stats[5].BaseStat)
+		fmt.Printf("Types:\n")
+		for _, typing := range value.Types {
+			fmt.Printf("- %v\n", typing.Type.Name)
+		}
+	}
 
+	return nil
+}
 func commandExit(config *Config, param []string) error {
 	os.Exit(0)
 	return nil
