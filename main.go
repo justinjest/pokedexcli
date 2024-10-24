@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand/v2"
 	"net/http"
 	"os"
 	"strings"
@@ -20,6 +21,7 @@ func main() {
 		Next:     "",
 		Previous: "",
 		cache:    pokeCache,
+		pokedex:  make(map[string]Pokemon),
 	}
 	reader := bufio.NewReader(os.Stdin)
 	for {
@@ -28,7 +30,6 @@ func main() {
 
 		input = strings.TrimSpace(input)
 		commands := strings.Fields(input)
-		fmt.Printf("%v\n", commands)
 		if len(commands) > 0 {
 			command := commands[0]
 			params := commands[1:]
@@ -387,6 +388,7 @@ type Config struct {
 	Next     string
 	Previous string
 	cache    *pokecache.Cache
+	pokedex  map[string]Pokemon
 }
 
 func getCommands(config *Config, param []string) map[string]cliCommand {
@@ -576,8 +578,16 @@ func catch(config *Config, params []string) error {
 		return err
 	}
 	fmt.Printf("Throwing a Pokeball at pikachu...\n")
-	fmt.Printf("%v was caught!", pokemonToCatch)
-
+	catchVal := rand.IntN(1000)
+	if catchVal >= pokemon.BaseExperience {
+		fmt.Printf("%s was caught!\n", pokemonToCatch)
+		config.pokedex[pokemonToCatch] = pokemon
+		for _, pokemans := range config.pokedex {
+			fmt.Printf("%v pokedex\n", pokemans.Name)
+		}
+	} else {
+		fmt.Printf("%s got away!\n", pokemonToCatch)
+	}
 	return nil
 }
 
