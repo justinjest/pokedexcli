@@ -428,6 +428,11 @@ func getCommands(config *Config, param []string) map[string]cliCommand {
 			description: "Check the stats of pokemon you have caught",
 			callback:    inspect,
 		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Check all the pokemon you have caught",
+			callback:    pokedex,
+		},
 	}
 }
 func mapPrevious(config *Config, param []string) error {
@@ -616,6 +621,17 @@ func inspect(config *Config, params []string) error {
 		}
 	}
 
+	return nil
+}
+
+func pokedex(config *Config, param []string) error {
+	if len(param) != 0 {
+		return errors.New("pokedex does not need any paramaters")
+	}
+	fmt.Printf("Your Pokedex:\n")
+	for _, pokemon := range config.pokedex {
+		fmt.Printf(" - %v\n", pokemon.Name)
+	}
 	return nil
 }
 func commandExit(config *Config, param []string) error {
